@@ -23,7 +23,6 @@ class VideoNode(Node):
                 ('hoop_height', 1000.0),
                 ('camera_height', 0.0),
                 ('pitch', 0.0),
-                ('yaw', 0.0),
             ]
         )
         self.dt = self.get_parameter('dt').get_parameter_value().double_value
@@ -35,7 +34,6 @@ class VideoNode(Node):
         self.hoop_height = self.get_parameter('hoop_height').get_parameter_value().double_value
         self.camera_height = self.get_parameter('camera_height').get_parameter_value().double_value
         self.pitch = self.get_parameter('pitch').get_parameter_value().double_value
-        self.yaw = self.get_parameter('yaw').get_parameter_value().double_value
         self.get_logger().info(f"""
         dt: {self.dt}
         fx: {self.fx}
@@ -46,14 +44,13 @@ class VideoNode(Node):
         hoop_height: {self.hoop_height}
         camera_height: {self.camera_height}
         pitch: {self.pitch}
-        yaw: {self.yaw}
         """)
         self.model = YOLO('yolov8n.pt')
         if self.model is None:
             self.get_logger().error('Failed to load YOLO model')
             return
         self.get_logger().info('YOLO model loaded successfully')
-        self.publisher_ = self.create_publisher(PoseStamped, 'camera_pose', 60)
+        self.publisher_ = self.create_publisher(PoseStamped, 'visual_pose', 60)
         self.timer = self.create_timer(self.dt, self.timer_callback)
 
         self.cap = cv2.VideoCapture(0)
@@ -135,7 +132,7 @@ class VideoNode(Node):
         x_world, y_world, z_world = self.visual_pose(center_x, center_y)
         msg = PoseStamped()
         msg.header.stamp = self.get_clock().now().to_msg()
-        msg.header.frame_id = 'camera_link'
+        msg.header.frame_id = 'camera_link' 
         msg.pose.position.x = float(x_world)
         msg.pose.position.y = float(y_world)
         msg.pose.position.z = float(z_world)

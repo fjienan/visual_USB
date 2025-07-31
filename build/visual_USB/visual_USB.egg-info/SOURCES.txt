@@ -1,6 +1,8 @@
 package.xml
 setup.cfg
 setup.py
+config/param.yaml
+launch/visual_location.launch.py
 resource/visual_USB
 visual_USB/__init__.py
 visual_USB/calibration.py

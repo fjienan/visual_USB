@@ -1,0 +1,21 @@
+[0.315s] Invoking command in '/home/jienan/visual_USB/build/visual_USB': PYTHONPATH=/home/jienan/visual_USB/build/visual_USB/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/jienan/visual_USB/install/visual_USB/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/jienan/visual_USB/build/visual_USB/build --no-deps symlink_data
+[0.450s] running develop
+[0.524s] running egg_info
+[0.524s] writing visual_USB.egg-info/PKG-INFO
+[0.524s] writing dependency_links to visual_USB.egg-info/dependency_links.txt
+[0.524s] writing entry points to visual_USB.egg-info/entry_points.txt
+[0.524s] writing requirements to visual_USB.egg-info/requires.txt
+[0.524s] writing top-level names to visual_USB.egg-info/top_level.txt
+[0.526s] reading manifest file 'visual_USB.egg-info/SOURCES.txt'
+[0.526s] writing manifest file 'visual_USB.egg-info/SOURCES.txt'
+[0.527s] running build_ext
+[0.527s] Creating /home/jienan/visual_USB/install/visual_USB/lib/python3.10/site-packages/visual-USB.egg-link (link to .)
+[0.528s] Installing video script to /home/jienan/visual_USB/install/visual_USB/lib/visual_USB
+[0.528s] 
+[0.528s] Installed /home/jienan/visual_USB/build/visual_USB
+[0.528s] running symlink_data
+[0.528s] creating /home/jienan/visual_USB/install/visual_USB/share/visual_USB/config
+[0.528s] symbolically linking /home/jienan/visual_USB/build/visual_USB/config/param.yaml -> /home/jienan/visual_USB/install/visual_USB/share/visual_USB/config
+[0.528s] creating /home/jienan/visual_USB/install/visual_USB/share/visual_USB/launch
+[0.528s] symbolically linking /home/jienan/visual_USB/build/visual_USB/launch/visual_location.launch.py -> /home/jienan/visual_USB/install/visual_USB/share/visual_USB/launch
+[0.545s] Invoked command in '/home/jienan/visual_USB/build/visual_USB' returned '0': PYTHONPATH=/home/jienan/visual_USB/build/visual_USB/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/jienan/visual_USB/install/visual_USB/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/jienan/visual_USB/build/visual_USB/build --no-deps symlink_data
