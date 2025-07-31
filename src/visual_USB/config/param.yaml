@@ -1,0 +1,12 @@
+video_node:
+  ros__parameters:
+    dt: 0.05
+    fx: 533.73871728
+    fy: 533.28432385
+    cx: 639.93902002
+    cy: 360.18051435
+    confidence: 0.5
+    hoop_height: 0.0
+    camera_height: 0.0
+    pitch: 0.0
+    yaw: 0.0

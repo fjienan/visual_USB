@@ -12,7 +12,7 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
     ],
-    install_requires=['setuptools'],
+    install_requires=['setuptools', 'ultralytics', 'opencv-python', 'numpy'],
     zip_safe=True,
     maintainer='ares',
     maintainer_email='ares@todo.todo',
