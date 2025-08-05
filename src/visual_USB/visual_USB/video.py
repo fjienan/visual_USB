@@ -5,9 +5,6 @@ from rclpy.node import Node
 from geometry_msgs.msg import PoseStamped
 from ultralytics import YOLO
 
-
-
-
 class VideoNode(Node):
     def __init__(self):
         super().__init__('video_node')
@@ -15,16 +12,17 @@ class VideoNode(Node):
             namespace='',
             parameters=[
                 ('dt', 0.05),
-                ('fx', 533.73871728),
-                ('fy', 533.28432385),
-                ('cx', 639.93902002),
-                ('cy', 360.18051435),
+                ('fx', 264.04947176),
+                ('fy', 264.46720319),
+                ('cx', 333.83380171),
+                ('cy', 190.78995458),
                 ('confidence', 0.5),
                 ('hoop_height', 1000.0),
                 ('camera_height', 0.0),
                 ('pitch', 0.0),
             ]
         )
+
         self.dt = self.get_parameter('dt').get_parameter_value().double_value
         self.fx = self.get_parameter('fx').get_parameter_value().double_value
         self.fy = self.get_parameter('fy').get_parameter_value().double_value
@@ -45,7 +43,7 @@ class VideoNode(Node):
         camera_height: {self.camera_height}
         pitch: {self.pitch}
         """)
-        self.model = YOLO('yolov8n.pt')
+        self.model = YOLO('/home/jienan/ares_code_projects/model/train/weights/best.pt')
         if self.model is None:
             self.get_logger().error('Failed to load YOLO model')
             return
@@ -53,8 +51,20 @@ class VideoNode(Node):
         self.publisher_ = self.create_publisher(PoseStamped, 'visual_pose', 60)
         self.timer = self.create_timer(self.dt, self.timer_callback)
 
-        self.cap = cv2.VideoCapture(0)
-        self.cap.set(cv2.CAP_PROP_FPS, 10)  # 尝试设置 60 fps
+        self.cap = cv2.VideoCapture(2)  # 使用ZED立體攝像頭 (最佳幀率: 58.61 FPS)
+        self.cap.set(cv2.CAP_PROP_FPS, 270)  # 尝试设置 60 fps
+        # 设置分辨率（宽度和高度）
+        width = 1280
+        height = 720
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+
+# 检查是否设置成功
+        actual_width = self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+        actual_height = self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        self.get_logger().info(f"设置分辨率: {width}x{height}, 实际分辨率: {actual_width}x{actual_height}")
+
+
         if not self.cap.isOpened():
             self.get_logger().error('Cannot open camera')
 
@@ -125,7 +135,7 @@ class VideoNode(Node):
         if not ret:
             self.get_logger().error('Failed to capture image')
             return
-        frame = frame[:, :frame.shape[1] // 2]
+        # frame = frame[:, :frame.shape[1] // 2]
 
         center_x, center_y = self.yolo_detect(frame)
 

@@ -9,7 +9,7 @@ with np.load('calib_result.npz') as X:
 print(f"相機矩陣: {mtx}")
 print(f"畸變係數: {dist}")
 # 讀取一張待去畸變的圖片
-img = cv2.imread('calib_img_0.jpg')
+img = cv2.imread('calib_img_1.jpg')
 h, w = img.shape[:2]
 
 # 計算優化後的新相機矩陣
