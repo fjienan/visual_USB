@@ -19,10 +19,48 @@ objpoints = []  # 3d points in real world space
 imgpoints = []  # 2d points in image plane
 
 # 采集图片
-cap = cv2.VideoCapture(4)  # 使用ZED立體攝像頭 (最佳幀率: 58.61 FPS)
-# cap.set(cv2.CAP_PROP_EXPOSURE, 1000)  
-cap.set(cv2.CAP_PROP_FPS, 60)  # 尝试设置 60 fps
+cap = cv2.VideoCapture(2)  # 使用ZED立體攝像頭 (最佳幀率: 58.61 FPS)
+if not cap.isOpened():
+    print("错误：无法打开摄像头")
+    exit()
 
+# --- 关键步骤：设置像素格式为 MJPEG ---
+# 使用 fourcc 编码 'M', 'J', 'P', 'G'
+# 注意：必须在设置分辨率和帧率之前设置 FOURCC
+fourcc = cv2.VideoWriter_fourcc(*'MJPG') 
+set_fourcc = cap.set(cv2.CAP_PROP_FOURCC, fourcc)
+if not set_fourcc:
+    print("警告：设置 MJPG 格式失败，你的摄像头可能不支持或者 V4L2 后端有问题。")
+    # 可以尝试不设置 FOURCC，看看默认是什么格式
+    # current_fourcc = int(cap.get(cv2.CAP_PROP_FOURCC))
+    # print(f"当前 FOURCC: {chr(current_fourcc & 0xff)}{chr((current_fourcc >> 8) & 0xff)}{chr((current_fourcc >> 16) & 0xff)}{chr((current_fourcc >> 24) & 0xff)}")
+
+# --- 设置期望的分辨率 ---
+# 比如设置 1920x1080
+width = 1280
+height = 1024
+set_width = cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+set_height = cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+if not set_width or not set_height:
+    print(f"警告：设置分辨率 {width}x{height} 失败。")
+
+# --- 设置期望的帧率 ---
+# 尝试设置 30 FPS
+fps = 190.0
+set_fps = cap.set(cv2.CAP_PROP_FPS, fps) # 使用浮点数
+if not set_fps:
+    print("警告：设置 30 FPS 失败。驱动可能会返回一个它能支持的帧率。")
+
+# 检查实际生效的参数
+actual_width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+actual_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+actual_fps = cap.get(cv2.CAP_PROP_FPS)
+actual_fourcc_int = int(cap.get(cv2.CAP_PROP_FOURCC))
+actual_fourcc_str = f"{chr(actual_fourcc_int & 0xff)}{chr((actual_fourcc_int >> 8) & 0xff)}{chr((actual_fourcc_int >> 16) & 0xff)}{chr((actual_fourcc_int >> 24) & 0xff)}"
+
+print(f"摄像头已打开。")
+print(f"请求参数：Format=MJPG, Width={width}, Height={height}, FPS={fps:.2f}")
+print(f"实际参数：Format={actual_fourcc_str}, Width={int(actual_width)}, Height={int(actual_height)}, FPS={actual_fps:.2f}")
 img_count = 0
 print("按空格拍照，按ESC退出采集。")
 
@@ -30,11 +68,9 @@ while True:
     ret, frame = cap.read()
     if not ret:
         break
-    h, w, _ = frame.shape
-    frame = frame[:, :w//2]
-    # 在圖像上現實帧率
-    cv2.putText(frame, f"FPS: {cap.get(cv2.CAP_PROP_FPS)}", (10, 30),
-                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+    h, w, _ = frame.shape    # 在圖像上現實帧率
+    # cv2.putText(frame, f"FPS: {cap.get(cv2.CAP_PROP_FPS)}", (10, 30),
+    #             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
     cv2.imshow('frame', frame)
     key = cv2.waitKey(1)
     if key == 27:  # ESC退出

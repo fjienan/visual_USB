@@ -4,6 +4,7 @@ import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import PoseStamped
 from ultralytics import YOLO
+import time
 
 class VideoNode(Node):
     def __init__(self):
@@ -12,16 +13,17 @@ class VideoNode(Node):
             namespace='',
             parameters=[
                 ('dt', 0.05),
-                ('fx', 264.04947176),
-                ('fy', 264.46720319),
-                ('cx', 333.83380171),
-                ('cy', 190.78995458),
+                ('fx', 656.58771575),
+                ('fy', 656.60110198),
+                ('cx', 631.58766775),
+                ('cy', 527.02964399),
                 ('confidence', 0.5),
-                ('hoop_height', 1000.0),
-                ('camera_height', 0.0),
-                ('pitch', 0.0),
+                ('hoop_height', 1700.0),
+                ('camera_height', 990.0),
+                ('pitch', 50.0),
             ]
         )
+        self.get_logger().info('VideoNode initialized')
 
         self.dt = self.get_parameter('dt').get_parameter_value().double_value
         self.fx = self.get_parameter('fx').get_parameter_value().double_value
@@ -43,7 +45,7 @@ class VideoNode(Node):
         camera_height: {self.camera_height}
         pitch: {self.pitch}
         """)
-        self.model = YOLO('/home/jienan/ares_code_projects/model/train/weights/best.pt')
+        self.model = YOLO('/home/jienan/ares_code_projects/model/train2/weights/best.pt')
         if self.model is None:
             self.get_logger().error('Failed to load YOLO model')
             return
@@ -51,22 +53,54 @@ class VideoNode(Node):
         self.publisher_ = self.create_publisher(PoseStamped, 'visual_pose', 60)
         self.timer = self.create_timer(self.dt, self.timer_callback)
 
-        self.cap = cv2.VideoCapture(2)  # 使用ZED立體攝像頭 (最佳幀率: 58.61 FPS)
-        self.cap.set(cv2.CAP_PROP_FPS, 270)  # 尝试设置 60 fps
-        # 设置分辨率（宽度和高度）
-        width = 1280
-        height = 720
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+        self.cap = cv2.VideoCapture(1 + cv2.CAP_V4L2)
+        self.camera_setting()
 
-# 检查是否设置成功
+        self.frame_count = 0
+        self.start_time = time.time()
+    def camera_setting(self):
+        if not self.cap.isOpened():
+            self.get_logger().error("错误：无法打开摄像头")
+            exit()
+
+        # --- 关键步骤：设置像素格式为 MJPEG ---
+        # 使用 fourcc 编码 'M', 'J', 'P', 'G'
+        # 注意：必须在设置分辨率和帧率之前设置 FOURCC
+        fourcc = cv2.VideoWriter_fourcc(*'MJPG') 
+        set_fourcc = self.cap.set(cv2.CAP_PROP_FOURCC, fourcc)
+        if not set_fourcc:
+            self.get_logger().warn("警告：设置 MJPG 格式失败，你的摄像头可能不支持或者 V4L2 后端有问题。")
+            # 可以尝试不设置 FOURCC，看看默认是什么格式
+            # current_fourcc = int(cap.get(cv2.CAP_PROP_FOURCC))
+            # print(f"当前 FOURCC: {chr(current_fourcc & 0xff)}{chr((current_fourcc >> 8) & 0xff)}{chr((current_fourcc >> 16) & 0xff)}{chr((current_fourcc >> 24) & 0xff)}")
+
+        # --- 设置期望的分辨率 ---
+        # 比如设置 1920x1080
+        width = 1280
+        height = 1024
+        set_width = self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+        set_height = self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+        if not set_width or not set_height:
+            self.get_logger().warn(f"警告：设置分辨率 {width}x{height} 失败。")
+
+        # --- 设置期望的帧率 ---
+        # 尝试设置 30 FPS
+        fps = 190.0
+        set_fps = self.cap.set(cv2.CAP_PROP_FPS, fps) # 使用浮点数
+        if not set_fps:
+            self.get_logger().warn("警告：设置 30 FPS 失败。驱动可能会返回一个它能支持的帧率。")
+
+        # 检查实际生效的参数
         actual_width = self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)
         actual_height = self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
-        self.get_logger().info(f"设置分辨率: {width}x{height}, 实际分辨率: {actual_width}x{actual_height}")
+        actual_fps = self.cap.get(cv2.CAP_PROP_FPS)
+        actual_fourcc_int = int(self.cap.get(cv2.CAP_PROP_FOURCC))
+        actual_fourcc_str = f"{chr(actual_fourcc_int & 0xff)}{chr((actual_fourcc_int >> 8) & 0xff)}{chr((actual_fourcc_int >> 16) & 0xff)}{chr((actual_fourcc_int >> 24) & 0xff)}"
 
+        self.get_logger().info(f"摄像头已打开。")
+        self.get_logger().info(f"请求参数：Format=MJPG, Width={width}, Height={height}, FPS={fps:.2f}")
+        self.get_logger().info(f"实际参数：Format={actual_fourcc_str}, Width={int(actual_width)}, Height={int(actual_height)}, FPS={actual_fps:.2f}")
 
-        if not self.cap.isOpened():
-            self.get_logger().error('Cannot open camera')
 
     def destroy_node(self):
         self.cap.release()
@@ -93,41 +127,22 @@ class VideoNode(Node):
                 center_y = (y1 + y2) / 2
                 cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 0, 255), 2)
                 cv2.circle(frame, (int(center_x), int(center_y)), 5, (0, 0, 255), -1)
+                self.get_logger().info(f"center_x: {center_x}, center_y: {center_y}")
         return center_x, center_y
     def visual_pose(self, x_center, y_center):
         """
         基于单目相机几何的物体定位
         世界坐标系：x-左，y-上，z-前
+        摄像头向上仰头50度
         """
-        if x_center is None or y_center is None:
-            return 0,0,0
-        # 将像素坐标转换为归一化相机坐标
-        x_norm = (x_center - self.cx) / self.fx
-        y_norm = (y_center - self.cy) / self.fy
-        
-        # 高度差（目标高度 - 相机高度）
         height_diff = self.hoop_height - self.camera_height
-        
-        # 考虑相机俯仰角，计算到目标的距离
-        # pitch > 0 表示相机向下俯视
-        denominator = -y_norm * np.cos(self.pitch) + np.sin(self.pitch)
-        
-        if abs(denominator) < 1e-6:
-            self.get_logger().warn("除零错误：相机视线与目标平面平行")
-            return 0,0,0
-        
-        # 计算到目标的距离（沿相机z轴方向）
-        distance = height_diff / denominator
-        
-        if distance <= 0:
-            self.get_logger().warn("计算得到负距离，检查几何设置")
-            return 0,0,0
-        
-        # 世界坐标系中的位置
-        x_world = -x_norm * distance  # 负号：像素x正方向对应世界x负方向
-        z_world = distance * np.cos(self.pitch)  # 前方距离
-        y_world = self.hoop_height  # 目标高度
-        
+        if x_center is None or y_center is None:
+            return 0,0,1000
+        pitch_rad = np.deg2rad(self.pitch)
+        x_world = self.cx-((-y_center+self.cy)/self.fy)*self.fx
+        y_world = self.hoop_height
+        z_world = height_diff*(self.fy*np.cos(pitch_rad)-((self.cy-y_center)*np.sin(pitch_rad)))/(self.fy*np.sin(pitch_rad)+(self.cy-y_center)*np.cos(pitch_rad))
+
         return x_world, y_world, z_world
         
     def timer_callback(self):
@@ -135,7 +150,15 @@ class VideoNode(Node):
         if not ret:
             self.get_logger().error('Failed to capture image')
             return
-        # frame = frame[:, :frame.shape[1] // 2]
+        self.frame_count += 1
+        current_time = time.time()
+        elapsed_time = current_time - self.start_time
+        if elapsed_time >= self.dt:
+            fps = self.frame_count / elapsed_time
+            print(f"当前实时 FPS: {fps:.2f}")
+            # 重置计数器和开始时间
+            self.frame_count = 0
+            self.start_time = current_time
 
         center_x, center_y = self.yolo_detect(frame)
 
@@ -143,11 +166,11 @@ class VideoNode(Node):
         msg = PoseStamped()
         msg.header.stamp = self.get_clock().now().to_msg()
         msg.header.frame_id = 'camera_link' 
-        msg.pose.position.x = float(x_world)
-        msg.pose.position.y = float(y_world)
-        msg.pose.position.z = float(z_world)
+        msg.pose.position.x = float(x_world)/1000.0
+        msg.pose.position.y = float(y_world)/1000.0
+        msg.pose.position.z = float(z_world)/1000.0
         self.publisher_.publish(msg)
-        self.get_logger().info(f"x_world: {x_world}, y_world: {y_world}, z_world: {z_world}")
+        self.get_logger().info(f"x_world: {x_world/1000.0}, y_world: {y_world/1000.0}, z_world: {z_world/1000.0}")
         cv2.imshow('Camera Feed', frame)
         cv2.waitKey(1)
 
@@ -159,3 +182,4 @@ def main(args=None):
     rclpy.shutdown()
 if __name__ == '__main__':
     main()
+

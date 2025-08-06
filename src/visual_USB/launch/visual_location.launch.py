@@ -8,7 +8,7 @@ import os
 def generate_launch_description():
     ld = LaunchDescription()
 
-    params_file = "/home/ares/ares_code_projects/src/visual_USB/config/params.yaml"
+    params_file = "/home/jienan/ares_code_projects/src/visual_USB/config/params.yaml"
     
     visual_node = Node(
         package='visual_USB',
