@@ -1,0 +1,3 @@
+[console_scripts]
+video = visual_USB.video:main
+
