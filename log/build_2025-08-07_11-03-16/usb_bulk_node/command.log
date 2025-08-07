@@ -1,0 +1,6 @@
+Invoking command in '/home/jienan/visual_USB/build/usb_bulk_node': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake /home/jienan/visual_USB/src/usb_bulk_node -DAMENT_CMAKE_SYMLINK_INSTALL=1 -DCMAKE_INSTALL_PREFIX=/home/jienan/visual_USB/install/usb_bulk_node
+Invoked command in '/home/jienan/visual_USB/build/usb_bulk_node' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake /home/jienan/visual_USB/src/usb_bulk_node -DAMENT_CMAKE_SYMLINK_INSTALL=1 -DCMAKE_INSTALL_PREFIX=/home/jienan/visual_USB/install/usb_bulk_node
+Invoking command in '/home/jienan/visual_USB/build/usb_bulk_node': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/jienan/visual_USB/build/usb_bulk_node -- -j24 -l24
+Invoked command in '/home/jienan/visual_USB/build/usb_bulk_node' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/jienan/visual_USB/build/usb_bulk_node -- -j24 -l24
+Invoking command in '/home/jienan/visual_USB/build/usb_bulk_node': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /home/jienan/visual_USB/build/usb_bulk_node
+Invoked command in '/home/jienan/visual_USB/build/usb_bulk_node' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /home/jienan/visual_USB/build/usb_bulk_node

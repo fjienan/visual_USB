@@ -25,6 +25,7 @@ setup(
     entry_points={
         'console_scripts': [
         'video = visual_USB.video:main',
+        'pid_map = visual_USB.pid_map:main',
         ],
     },
 )

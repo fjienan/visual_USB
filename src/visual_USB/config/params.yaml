@@ -6,6 +6,6 @@ video_node:
     cx: 631.58766775
     cy: 527.02964399
     confidence: 0.5
-    hoop_height: 1840.0
-    camera_height: 1200.0
+    hoop_height: 2430.0
+    camera_height: 1360.0
     pitch: 50.0 

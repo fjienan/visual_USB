@@ -1,3 +1,4 @@
 [console_scripts]
+pid_map = visual_USB.pid_map:main
 video = visual_USB.video:main
 

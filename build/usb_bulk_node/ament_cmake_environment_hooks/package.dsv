@@ -1,0 +1,4 @@
+source;share/usb_bulk_node/local_setup.bash
+source;share/usb_bulk_node/local_setup.dsv
+source;share/usb_bulk_node/local_setup.sh
+source;share/usb_bulk_node/local_setup.zsh
