@@ -3,7 +3,7 @@
 # 定义要执行的命令
 commands=( 
     "ros2 launch visual_USB visual_location.launch.py"
-    "python3 /home/jienan/visual_USB/src/visual_USB/pid_map.py"
+    "python3 /home/jienan/visual_USB/src/visual_USB/pid_map_1.py"
 )
 
 # 获取终端数量
